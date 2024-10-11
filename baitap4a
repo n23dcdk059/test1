@@ -1,0 +1,145 @@
+//Cấu trúc Mã nguồn
+//Mã nguồn bao gồm các thành phần chính sau :
+//1. Lớp trừu tượng Borrowable
+//2. Lớp Book kế thừa từ Borrowable
+//3. Lớp DVD kế thừa từ Borrowable
+//4. Lớp Library quản lý các đối tượng Borrowable
+//5. Hàm main() để demo chức năng của hệ thống
+
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+
+class Borrowable {
+public:
+    virtual void borrow() = 0; // Phương thức mượn
+    virtual void returnItem() = 0; // Phương thức trả
+    virtual void displayInfo() const = 0; // Phương thức hiển thị thông tin
+    virtual ~Borrowable() = default; // Destructor ảo
+};
+
+class Book : public Borrowable {
+private:
+    std::string title;
+    std::string author;
+    bool isBorrowed;
+
+public:
+    Book(const std::string& title, const std::string& author)
+        : title(title), author(author), isBorrowed(false) {}
+
+    void borrow() override {
+        if (!isBorrowed) {
+            isBorrowed = true;
+            std::cout << "Da muon sach: " << title << " cua tac gia: " << author << std::endl;
+        }
+        else {
+            std::cout << "Sach " << title << " da duoc muon." << std::endl;
+        }
+    }
+
+    void returnItem() override {
+        if (isBorrowed) {
+            isBorrowed = false;
+            std::cout << "Da tra sach: " << title << std::endl;
+        }
+        else {
+            std::cout << "Sach " << title << " chua duoc muon." << std::endl;
+        }
+    }
+
+    void displayInfo() const override {
+        std::cout << "Sach: " << title << ", Tac gia: " << author << ", Trang thai: "
+            << (isBorrowed ? "Da muon" : "Con") << std::endl;
+    }
+};
+
+class DVD : public Borrowable {
+private:
+    std::string title;
+    int duration; // Thời gian (phút)
+    bool isBorrowed;
+
+public:
+    DVD(const std::string& title, int duration)
+        : title(title), duration(duration), isBorrowed(false) {}
+
+    void borrow() override {
+        if (!isBorrowed) {
+            isBorrowed = true;
+            std::cout << "Da muon DVD: " << title << " (Thoi gian: " << duration << " phut)" << std::endl;
+        }
+        else {
+            std::cout << "DVD " << title << " da duoc muon." << std::endl;
+        }
+    }
+
+    void returnItem() override {
+        if (isBorrowed) {
+            isBorrowed = false;
+            std::cout << "Da tra DVD: " << title << std::endl;
+        }
+        else {
+            std::cout << "DVD " << title << " chua duoc muon." << std::endl;
+        }
+    }
+
+    void displayInfo() const override {
+        std::cout << "DVD: " << title << ", Thoi gian: " << duration << " phut, Trang thai: "
+            << (isBorrowed ? "Da muon" : "Con") << std::endl;
+    }
+};
+
+class Library {
+private:
+    std::vector<std::unique_ptr<Borrowable>> items; // Danh sach cac tai san
+
+public:
+    void addItem(Borrowable* item) {
+        items.emplace_back(item); // Thêm tài sản vào thư viện
+    }
+
+    void displayAllItems() const {
+        std::cout << "Danh sach tai san trong thu vien:" << std::endl;
+        for (const auto& item : items) {
+            item->displayInfo();
+        }
+    }
+
+    void borrowItem(int index) {
+        if (index >= 0 && index < items.size()) {
+            items[index]->borrow(); // Mượn tài sản theo chỉ số
+        }
+        else {
+            std::cout << "Chi so khong hop le!" << std::endl;
+        }
+    }
+
+    void returnItem(int index) {
+        if (index >= 0 && index < items.size()) {
+            items[index]->returnItem(); // Trả tài sản theo chỉ số
+        }
+        else {
+            std::cout << "Chi so khong hop le!" << std::endl;
+        }
+    }
+};
+
+int main() {
+    Library myLibrary;
+
+    myLibrary.addItem(new Book("To Kill a Mockingbird", "Harper Lee"));
+    myLibrary.addItem(new DVD("Inception", 148));
+
+    myLibrary.displayAllItems();
+
+    myLibrary.borrowItem(0); // Mượn sách
+    myLibrary.returnItem(0); // Trả sách
+
+    myLibrary.borrowItem(1); // Mượn DVD
+    myLibrary.returnItem(1); // Trả DVD
+
+    return 0;
+}
